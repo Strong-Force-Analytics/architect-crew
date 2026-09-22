@@ -1,7 +1,7 @@
 {
   "name": "architect-crew",
-  "description": "Architect + crew: an Opus main session delegates bounded work to cheap Haiku and Sonnet subagents (scout, runner, builder).",
-  "version": "0.1.0",
+  "description": "Architect + crew: an Opus main session delegates bounded work to cheap Haiku and Sonnet subagents (scout, runner, builder, reviewer).",
+  "version": "0.2.0",
   "author": {
     "name": "Strong Force Analytics"
   },

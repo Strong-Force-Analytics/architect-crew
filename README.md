@@ -5,17 +5,19 @@ Make long Claude Code sessions cheaper by letting a **cheap model do the reading
 Your main session (Opus) acts as the *architect*: it plans, decides and reviews. Bounded
 work goes to a small *crew* of cheaper subagents instead:
 
-| Agent   | Model  | Give it...                          | It returns...                               |
-|---------|--------|-------------------------------------|---------------------------------------------|
-| scout   | Haiku  | a big file or a wide search         | only the answer + `file:line`, never the file |
-| runner  | Haiku  | a command you already decided       | the exact output and numbers                |
-| builder | Sonnet | an edit you already decided         | a diff for the architect to review          |
+| Agent    | Model  | Give it...                          | It returns...                                |
+|----------|--------|--------------------------------------|-----------------------------------------------|
+| scout    | Haiku  | a big file or a wide search          | only the answer + `file:line`, never the file |
+| runner   | Haiku  | a command you already decided        | the exact output and numbers                  |
+| builder  | Sonnet | an edit you already decided          | a diff for the architect to review            |
+| reviewer | Haiku  | a diff, branch, or file to review    | severity-tagged findings only, no fixes applied |
 
-Why it matters: reading large files and running noisy commands is what burns a session's
-budget. The crew reads a lot and hands back a little.
+Why it matters: reading large files, running noisy commands, and reviewing diffs line by
+line is what burns a session's budget. The crew reads a lot and hands back a little.
 
-> Pattern and agent definitions by **Brett Ragozzine**.
+> Base pattern and the scout/runner/builder agent definitions by **Brett Ragozzine**.
 > His write-up (with measured results): <https://claude.ai/code/artifact/f76db9cd-72de-4a80-a8c9-85e6576b9422>
+> `reviewer` added by the team after comparing two independent architect + crew setups.
 
 ---
 
@@ -37,7 +39,7 @@ That's it. Nothing else to configure.
 ### Check it worked
 
 1. Type `/context`. Under custom agents you should see `architect-crew:scout`,
-   `architect-crew:runner` and `architect-crew:builder`.
+   `architect-crew:runner`, `architect-crew:builder` and `architect-crew:reviewer`.
 2. Start a **new** session and ask: *"Do you have a 'Session shape - architect + crew'
    section in your instructions?"* It should say yes.
 
@@ -49,6 +51,7 @@ You don't have to do anything special. Work as usual, with **Opus** as your main
 - a file over ~10 KB, or a search across many files → **scout**
 - tests, builds, lints, counts whose output is long → **runner**
 - a decided edit across several files (rename, add a field, port a pattern) → **builder**
+- reviewing a diff, branch, or file for defects → **reviewer**
 
 You can also ask for it directly:
 
@@ -56,6 +59,7 @@ You can also ask for it directly:
 Use scout to find where the retry logic is defined and who calls it.
 Have runner run the test suite and report the failing test names and the totals.
 Have builder rename `getUser` to `fetchUser` everywhere, then show me the diff.
+Have reviewer review this branch for defects and report findings only.
 ```
 
 Rules of thumb:
@@ -63,6 +67,8 @@ Rules of thumb:
 - **Give builder the decision, not the problem.** "Rename X to Y in these files" works.
   "Fix the login bug" does not; that's a design task for the architect.
 - **Ask scout a specific question**, and say which values you want back.
+- **Give reviewer the scope, not a request for a fix.** It returns severity-tagged
+  findings; it has no edit tools and won't apply one.
 - **Review the diff, not the summary.** Agents can leave out their own mistakes.
 - Design decisions, debugging and cross-file reasoning stay with the architect.
 
@@ -105,13 +111,13 @@ gh auth login
 | Agents don't show in `/context` | Run `/reload-plugins`, or restart Claude Code. |
 | Agents show but the architect never delegates | The rules load at session start. Start a **new** session, and make sure your main model is Opus. |
 | Windows: rules don't load | The hook runs in Git Bash. Install [Git for Windows](https://git-scm.com/download/win) and restart. |
-| You already have your own `scout`/`runner`/`builder` agents | Per the Claude Code docs, agents in your `.claude/agents/` override same-named plugin agents. Rename or remove yours to use the plugin versions. |
+| You already have your own `scout`/`runner`/`builder`/`reviewer` agents | Per the Claude Code docs, agents in your `.claude/agents/` override same-named plugin agents. Rename or remove yours to use the plugin versions. |
 
 ## What's in this repo
 
 ```
 .claude-plugin/plugin.json   plugin manifest (name, version)
-agents/                      scout.md, runner.md, builder.md (model set in frontmatter)
+agents/                      scout.md, runner.md, builder.md, reviewer.md (model set in frontmatter)
 hooks/hooks.json             SessionStart hook: injects the delegation rules
 rules/session-shape.md       the delegation rules the architect follows
 CHANGELOG.md                 release notes
@@ -132,11 +138,15 @@ claude --plugin-dir ./architect-crew
 
 ## Status
 
-**v0.1.0, first team release.**
+**v0.2.0.**
 
-- The rules in `rules/session-shape.md` are written from Brett's summary, not his
-  original `CLAUDE.global.md` text. They should be replaced with his version.
-- Tested: plugin validates, and in a real session the rules load and all three agents
+- The base rules in `rules/session-shape.md` are written from Brett's summary, not his
+  original `CLAUDE.global.md` text. They should be replaced with his version; the
+  `reviewer` section is team-authored and stays either way.
+- `reviewer` (Haiku) added after comparing two independent architect + crew setups —
+  folds diff/branch/file review into the crew instead of the architect reading the
+  whole diff itself.
+- Tested: plugin validates, and in a real session the rules load and all four agents
   are available. Not yet measured: how much budget this saves for *our* work. Try it and
   tell us.
 

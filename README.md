@@ -24,8 +24,8 @@ line is what burns a session's budget. The crew reads a lot and hands back a lit
 
 ## Install (2 minutes)
 
-You need: Claude Code, and read access to the two private repos in the
-`Strong-Force-Analytics` GitHub org (see [Access](#access)).
+You need: [Claude Code](https://code.claude.com) and `git` on your machine. Both repos
+are public, so no GitHub access or login is required.
 
 In Claude Code, run:
 
@@ -90,25 +90,19 @@ New versions are announced in [CHANGELOG.md](CHANGELOG.md). Updates only arrive 
 /plugin uninstall architect-crew@sfa-plugins
 ```
 
-## Access
+## Repos
 
-Both repos are private:
+- <https://github.com/Strong-Force-Analytics/architect-crew> — this plugin
+- <https://github.com/Strong-Force-Analytics/claude-plugins> — the marketplace that lists it
 
-- <https://github.com/Strong-Force-Analytics/architect-crew>
-- <https://github.com/Strong-Force-Analytics/claude-plugins> (the marketplace)
-
-You need to be a member of the `Strong-Force-Analytics` org (or a collaborator on both
-repos) **and** have git credentials on your machine:
-
-```
-gh auth login
-```
+Both are public. If `git` prompts for credentials anyway (some networks/proxies do this
+even for public repos), run `gh auth login` once.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| `/plugin marketplace add` fails with "repository not found" or an auth error | You lack access or aren't logged in. Run `gh auth login` and ask an org admin to add you to both repos. |
+| `/plugin marketplace add` fails with "repository not found" | Double-check the spelling: `Strong-Force-Analytics/claude-plugins`. If it persists, run `gh auth login` and retry. |
 | Agents don't show in `/context` | Run `/reload-plugins`, or restart Claude Code. |
 | Agents show but the architect never delegates | The rules load at session start. Start a **new** session, and make sure your main model is Opus. |
 | Windows: rules don't load | The hook runs in Git Bash. Install [Git for Windows](https://git-scm.com/download/win) and restart. |
@@ -155,5 +149,5 @@ If you installed an earlier version, run `/plugin marketplace update` then
 `/reload-plugins` to pick up Brett's real rules — the previous text was a guess at his
 wording and thresholds.
 
-Internal use. No open-source license has been chosen; that's Brett's decision if this
-ever goes public.
+Public, [MIT licensed](LICENSE). Originally built for internal use at Strong Force
+Analytics; shared publicly with Brett's agreement.

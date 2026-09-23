@@ -15,7 +15,8 @@ work goes to a small *crew* of cheaper subagents instead:
 Why it matters: reading large files, running noisy commands, and reviewing diffs line by
 line is what burns a session's budget. The crew reads a lot and hands back a little.
 
-> Base pattern and the scout/runner/builder agent definitions by **Brett Ragozzine**.
+> Pattern, the scout/runner/builder agent definitions, and the delegation rules by
+> **Brett Ragozzine** — the rules are his original `CLAUDE.global.md` text, shared in full.
 > His write-up (with measured results): <https://claude.ai/code/artifact/f76db9cd-72de-4a80-a8c9-85e6576b9422>
 > `reviewer` added by the team after comparing two independent architect + crew setups.
 
@@ -138,17 +139,21 @@ claude --plugin-dir ./architect-crew
 
 ## Status
 
-**v0.2.0.**
+**v0.3.0.**
 
-- The base rules in `rules/session-shape.md` are written from Brett's summary, not his
-  original `CLAUDE.global.md` text. They should be replaced with his version; the
-  `reviewer` section is team-authored and stays either way.
+- `rules/session-shape.md` is now Brett Ragozzine's actual "Session shape – architect +
+  crew" text from his `CLAUDE.global.md`, not a reconstruction. The `reviewer` section is
+  the team's addition on top of it, marked inline as such.
 - `reviewer` (Haiku) added after comparing two independent architect + crew setups —
   folds diff/branch/file review into the crew instead of the architect reading the
   whole diff itself.
 - Tested: plugin validates, and in a real session the rules load and all four agents
   are available. Not yet measured: how much budget this saves for *our* work. Try it and
   tell us.
+
+If you installed an earlier version, run `/plugin marketplace update` then
+`/reload-plugins` to pick up Brett's real rules — the previous text was a guess at his
+wording and thresholds.
 
 Internal use. No open-source license has been chosen; that's Brett's decision if this
 ever goes public.

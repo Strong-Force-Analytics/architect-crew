@@ -3,6 +3,17 @@
 Bump `version` in `.claude-plugin/plugin.json` for every change users should receive;
 Claude Code only updates a plugin when its version changes.
 
+## 0.3.0
+
+- `rules/session-shape.md` replaced with Brett Ragozzine's original "Session shape -
+  architect + crew" text from his `CLAUDE.global.md`, shared 2026-09-23. This is his real
+  wording, not the team's earlier reconstruction from his summary artifact.
+- Kept the `reviewer` agent and its two rule additions from 0.2.0, marked inline as team
+  additions so it stays clear which parts are Brett's and which aren't.
+- Everyone should update: the previous rules text was a guess at thresholds and wording;
+  this version has Brett's actual dispatch triggers, the concurrent-dispatch guidance, and
+  the four return-handling rules.
+
 ## 0.2.0
 
 - Added `reviewer` (Haiku): reviews a diff, branch, or file for defects and returns

@@ -73,7 +73,7 @@ start-up rules need [Git for Windows](https://git-scm.com/download/win).
 ## Credits
 
 The method, the scout, runner and builder helpers, the rules and the measurements are by
-Brett Ragozzine. The reviewer was added by
+[Brett Ragozzine](https://github.com/brag42). The reviewer was added by
 [Strong Force Analytics](https://github.com/Strong-Force-Analytics). Changes are listed in
 [CHANGELOG.md](CHANGELOG.md).
 

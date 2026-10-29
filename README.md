@@ -20,6 +20,15 @@ helper models that send back only what matters.
 Reading big files, running noisy commands and going through diffs line by line is what uses up
 a session's budget. The helpers read a lot and hand back a little.
 
+## Measured results
+
+<p align="center">
+  <img src="docs/img/results.png" alt="Measured results: 68% less session budget (649 vs 2,050 Opus-equivalent units), 18 times less text sent back to the main session, 84% of sessions used the crew; Haiku ran 79.5% of 1,515 helper tasks, Sonnet 19%, Opus 1.5%" width="820">
+</p>
+
+From 1,515 helper tasks across 167 sessions in two projects. Budget is counted in
+Opus-equivalent units from public list prices, not dollars.
+
 ## Install
 
 In Claude Code:
@@ -63,10 +72,10 @@ start-up rules need [Git for Windows](https://git-scm.com/download/win).
 
 ## Credits
 
-The method, the scout, runner and builder helpers, and the rules are by Brett Ragozzine
-([his write-up, with measured results](https://claude.ai/code/artifact/f76db9cd-72de-4a80-a8c9-85e6576b9422)).
-The reviewer was added by [Strong Force Analytics](https://github.com/Strong-Force-Analytics).
-Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+The method, the scout, runner and builder helpers, the rules and the measurements are by
+Brett Ragozzine. The reviewer was added by
+[Strong Force Analytics](https://github.com/Strong-Force-Analytics). Changes are listed in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

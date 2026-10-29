@@ -1,153 +1,73 @@
 # architect-crew
 
-Make long Claude Code sessions cheaper by letting a **cheap model do the reading**.
+A Claude Code plugin that makes long sessions cheaper. Your main session on Opus keeps the
+thinking: planning, decisions and review. Reading, running and simple edits go to cheaper
+helper models that send back only what matters.
 
-Your main session (Opus) acts as the *architect*: it plans, decides and reviews. Bounded
-work goes to a small *crew* of cheaper subagents instead:
+## How it works
 
-| Agent    | Model  | Give it...                          | It returns...                                |
-|----------|--------|--------------------------------------|-----------------------------------------------|
-| scout    | Haiku  | a big file or a wide search          | only the answer + `file:line`, never the file |
-| runner   | Haiku  | a command you already decided        | the exact output and numbers                  |
-| builder  | Sonnet | an edit you already decided          | a diff for the architect to review            |
-| reviewer | Haiku  | a diff, branch, or file to review    | severity-tagged findings only, no fixes applied |
+<p align="center">
+  <img src="docs/img/how-it-works.png" alt="The main session on Opus hands decided tasks to four helpers, scout, runner, builder and reviewer, and each sends back a short result" width="820">
+</p>
 
-Why it matters: reading large files, running noisy commands, and reviewing diffs line by
-line is what burns a session's budget. The crew reads a lot and hands back a little.
+| Helper | Model | Give it | You get back |
+|---|---|---|---|
+| scout | Haiku | a big file or a wide search | the answer and where it is, never the file |
+| runner | Haiku | a command to run | the exact output and numbers |
+| builder | Sonnet | an edit that's already decided | a diff for you to check |
+| reviewer | Haiku | a diff, branch or file | the problems it found, no fixes |
 
-> Pattern, the scout/runner/builder agent definitions, and the delegation rules by
-> **Brett Ragozzine** — the rules are his original `CLAUDE.global.md` text, shared in full.
-> His write-up (with measured results): <https://claude.ai/code/artifact/f76db9cd-72de-4a80-a8c9-85e6576b9422>
-> `reviewer` added by the team after comparing two independent architect + crew setups.
+Reading big files, running noisy commands and going through diffs line by line is what uses up
+a session's budget. The helpers read a lot and hand back a little.
 
----
+## Install
 
-## Install (2 minutes)
+In Claude Code:
 
-You need: [Claude Code](https://code.claude.com) and `git` on your machine. Both repos
-are public, so no GitHub access or login is required.
-
-In Claude Code, run:
-
-```
+```text
 /plugin marketplace add Strong-Force-Analytics/claude-plugins
 /plugin install architect-crew@sfa-plugins
 /reload-plugins
 ```
 
-That's it. Nothing else to configure.
-
-### Check it worked
-
-1. Type `/context`. Under custom agents you should see `architect-crew:scout`,
-   `architect-crew:runner`, `architect-crew:builder` and `architect-crew:reviewer`.
-2. Start a **new** session and ask: *"Do you have a 'Session shape - architect + crew'
-   section in your instructions?"* It should say yes.
+Nothing else to set up. Use Opus as your main model (`/model opus`), then work as usual.
 
 ## Use it
 
-You don't have to do anything special. Work as usual, with **Opus** as your main model
-(`/model opus`). The rules injected at session start tell the architect when to delegate:
+The plugin adds a short set of rules at the start of every session that tell the main session
+when to hand work off. You can also ask directly:
 
-- a file over ~10 KB, or a search across many files → **scout**
-- tests, builds, lints, counts whose output is long → **runner**
-- a decided edit across several files (rename, add a field, port a pattern) → **builder**
-- reviewing a diff, branch, or file for defects → **reviewer**
-
-You can also ask for it directly:
-
-```
+```text
 Use scout to find where the retry logic is defined and who calls it.
-Have runner run the test suite and report the failing test names and the totals.
-Have builder rename `getUser` to `fetchUser` everywhere, then show me the diff.
-Have reviewer review this branch for defects and report findings only.
+Have runner run the test suite and report the failing tests.
+Have builder rename getUser to fetchUser everywhere, then show me the diff.
+Have reviewer check this branch for defects.
 ```
 
-Rules of thumb:
+A few tips:
 
-- **Give builder the decision, not the problem.** "Rename X to Y in these files" works.
-  "Fix the login bug" does not; that's a design task for the architect.
-- **Ask scout a specific question**, and say which values you want back.
-- **Give reviewer the scope, not a request for a fix.** It returns severity-tagged
-  findings; it has no edit tools and won't apply one.
-- **Review the diff, not the summary.** Agents can leave out their own mistakes.
-- Design decisions, debugging and cross-file reasoning stay with the architect.
+- **Hand over decisions, not problems.** "Rename X to Y in these files" works; "fix the login
+  bug" stays with the main session.
+- **Ask scout a specific question**, and say what you want back.
+- **Check the diff, not the summary.** A helper can miss its own mistakes.
 
-## Update
+## Update or remove
 
-```
+```text
 /plugin marketplace update
-/reload-plugins
-```
-
-New versions are announced in [CHANGELOG.md](CHANGELOG.md). Updates only arrive when the
-`version` in `.claude-plugin/plugin.json` is bumped.
-
-## Turn off / remove
-
-```
-/plugin disable architect-crew@sfa-plugins
 /plugin uninstall architect-crew@sfa-plugins
 ```
 
-## Repos
+If the helpers don't show up, run `/reload-plugins` or start a new session. On Windows the
+start-up rules need [Git for Windows](https://git-scm.com/download/win).
 
-- <https://github.com/Strong-Force-Analytics/architect-crew> — this plugin
-- <https://github.com/Strong-Force-Analytics/claude-plugins> — the marketplace that lists it
+## Credits
 
-Both are public. If `git` prompts for credentials anyway (some networks/proxies do this
-even for public repos), run `gh auth login` once.
+The method, the scout, runner and builder helpers, and the rules are by Brett Ragozzine
+([his write-up, with measured results](https://claude.ai/code/artifact/f76db9cd-72de-4a80-a8c9-85e6576b9422)).
+The reviewer was added by [Strong Force Analytics](https://github.com/Strong-Force-Analytics).
+Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
-## Troubleshooting
+## License
 
-| Problem | Fix |
-|---------|-----|
-| `/plugin marketplace add` fails with "repository not found" | Double-check the spelling: `Strong-Force-Analytics/claude-plugins`. If it persists, run `gh auth login` and retry. |
-| Agents don't show in `/context` | Run `/reload-plugins`, or restart Claude Code. |
-| Agents show but the architect never delegates | The rules load at session start. Start a **new** session, and make sure your main model is Opus. |
-| Windows: rules don't load | The hook runs in Git Bash. Install [Git for Windows](https://git-scm.com/download/win) and restart. |
-| You already have your own `scout`/`runner`/`builder`/`reviewer` agents | Per the Claude Code docs, agents in your `.claude/agents/` override same-named plugin agents. Rename or remove yours to use the plugin versions. |
-
-## What's in this repo
-
-```
-.claude-plugin/plugin.json   plugin manifest (name, version)
-agents/                      scout.md, runner.md, builder.md, reviewer.md (model set in frontmatter)
-hooks/hooks.json             SessionStart hook: injects the delegation rules
-rules/session-shape.md       the delegation rules the architect follows
-CHANGELOG.md                 release notes
-```
-
-The plugin can't write to your `~/.claude/CLAUDE.md`, so the rules are delivered by a
-SessionStart hook, which runs on every start, resume, `/clear` and compaction.
-
-## Contributing
-
-Change the agents or rules in a branch, bump `version` in `.claude-plugin/plugin.json`,
-add a line to `CHANGELOG.md`, and open a pull request. CI runs
-`claude plugin validate`. To try changes locally without installing:
-
-```
-claude --plugin-dir ./architect-crew
-```
-
-## Status
-
-**v0.3.0.**
-
-- `rules/session-shape.md` is now Brett Ragozzine's actual "Session shape – architect +
-  crew" text from his `CLAUDE.global.md`, not a reconstruction. The `reviewer` section is
-  the team's addition on top of it, marked inline as such.
-- `reviewer` (Haiku) added after comparing two independent architect + crew setups —
-  folds diff/branch/file review into the crew instead of the architect reading the
-  whole diff itself.
-- Tested: plugin validates, and in a real session the rules load and all four agents
-  are available. Not yet measured: how much budget this saves for *our* work. Try it and
-  tell us.
-
-If you installed an earlier version, run `/plugin marketplace update` then
-`/reload-plugins` to pick up Brett's real rules — the previous text was a guess at his
-wording and thresholds.
-
-Public, [MIT licensed](LICENSE). Originally built for internal use at Strong Force
-Analytics; shared publicly with Brett's agreement.
+[MIT](LICENSE)
